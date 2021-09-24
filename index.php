@@ -13,6 +13,8 @@ $file_handle = null;
 $split_data = null;
 $message = array();
 $message_array = array();
+$success_message = null;
+
 
 if(!empty($_POST['btn_submit'])) {
 
@@ -29,6 +31,8 @@ if(!empty($_POST['btn_submit'])) {
 
         //ファイルを閉じる
         fclose($file_handle);
+
+        $success_message = 'メッセージを書き込みました。';
     }
 }
 
@@ -292,6 +296,9 @@ if($file_handle = fopen( FILENAME,'r')) {
         <body>
             <h1>ひと言掲示板</h1>
             <!-- ここにメッセージの入力フォームを設置 -->
+            <?php if(!empty($success_message)): ?>
+                <p class="success_message"><?php echo $success_message; ?></p>
+            <?php endif; ?>
             <form method="post">
                 <div>
                     <label for="view_name">表示名</label>
