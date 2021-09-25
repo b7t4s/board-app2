@@ -111,9 +111,16 @@ if(!empty($_POST['btn_submit'])) {
     }
 }
 
+if(empty($error_message)) {
+
+    //メッセージのデータを取得する
+    $sql = "SELECT view_name,message,post_date FROM message2 ORDER BY post_date DESC";
+    $message_array = $pdo->query($sql);
+}
+
 //データベースの接続を閉じる
 $pdo = null;
-
+/*コメントアウト
 if($file_handle = fopen( FILENAME,'r')) {
     while($data = fgets($file_handle)) {
 
@@ -131,6 +138,7 @@ if($file_handle = fopen( FILENAME,'r')) {
     //ファイルを閉じる
     fclose($file_handle);
 }
+ここまでコメントアウト*/
  
 ?>
 <!DOCTYPE html>
@@ -405,7 +413,7 @@ if($file_handle = fopen( FILENAME,'r')) {
                     <h2><?php echo $value['view_name']; ?></h2>
                     <time><?php echo date('Y年m月d日　H:i',strtotime($value['post_date'])); ?></time>
                 </div>
-                <p><?php echo $value['message']; ?></p>
+                <p><?php echo nl2br($value['message']); ?></p>
             </article>
             <?php endforeach; ?>
             <?php endif; ?>
