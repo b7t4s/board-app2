@@ -1,5 +1,7 @@
 <?php 
-//var_dump($_POST);
+
+//管理ページのログインパスワード
+define('PASSWORD','adminPassword');
 
 //データベースの接続情報
 define('DB_HOST','localhost');
@@ -39,6 +41,12 @@ try {
     
 
 if(!empty($_POST['btn_submit'])) {
+
+    if(!empty($_POST['admin_password'])&& $_POST['admin_password'] === PASSWORD) {
+        $_SESSION['admin_login'] = true;
+    }else{
+        $error_message[] = 'ログインに失敗しました。';
+    }
 
   }
 
@@ -176,6 +184,7 @@ $pdo = null;
                     font-size: 86%;
                 }
                 input[type="text"],
+                input[type="password"],
                 textarea {
                     margin-bottom: 20px;
                     padding: 10px;
@@ -184,7 +193,8 @@ $pdo = null;
                     border-radius: 3px;
                     background: #fff;
                 }
-                input[type="text"] {
+                input[type="text"],
+                input[type="password"] {
                     width: 200px;
                 }
                 textarea {
@@ -303,6 +313,8 @@ $pdo = null;
                 </ul>
             <?php endif; ?>
             <section>
+
+            <?php if(!empty($_SESSION['admin_login'])&& $_SESSION['admin_login'] === true): ?>
             <!-- ここに投稿されたメッセージを表示 -->
             <?php if(!empty($message_array)): ?>
             <?php foreach($message_array as $value): ?>
@@ -314,6 +326,17 @@ $pdo = null;
                 <p><?php echo nl2br(htmlspecialchars($value['message'],ENT_QUOTES,'UTF-8')); ?></p>
             </article>
             <?php endforeach; ?>
+            <?php endif; ?>
+
+            <?php else: ?>
+            <form method="post">
+                <div>
+                    <label for="admin_password">ログインパスワード</label>
+                    <input id="admin_password" type="password" name="admin_password" value="">
+                </div>
+                <input type="submit" name="btn_submit" value="ログイン">
+            </form>
+            
             <?php endif; ?>
             </section>
         </body>
