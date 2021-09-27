@@ -13,19 +13,17 @@ define('DB_NAME','board2');
 date_default_timezone_set('Asia/Tokyo');
 
 //変数の初期化
-$current_date = null;
-$message = array();
-$message_array = array();
-$success_message = null;
-$error_message = array();
+$csv_data = null;
+$sql = null;
 $pdo = null;
-$stmt = null;
-$res = null;
 $option = null;
+$message_array = array();
 
 session_start();
 
-//データベースに接続
+if(!empty($_SESSION['admin_login'])&& $_SESSION['admin_login'] === true) {
+
+    //データベースに接続
 try {
     $option = array(
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -33,33 +31,50 @@ try {
     );
     $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST,DB_USER,DB_PASS,$option);
 
+    //メッセージのセータを取得する(データを取得するSQLは、データが登録された順番(古い順)にするためORDER BY post_date ASCを指定する)
+    $sql = "SELECT * FROM message2 ORDER BY post_date ASC";
+    $message_array = $pdo->query($sql);
+
+    //データベースの接続を閉じる
+    $pdo = null;
+
 }catch(PDOException $e) {
 
-    //接続エラーのときエラー内容を取得する
-    $error_message[] = $e->getMessage();
+    //管理者ページへリダイレクト
+    header("Location:./admin.php");
+    exit;
 }
-    
 
-if(!empty($_POST['btn_submit'])) {
+    //出力の設定
+    header("Content_Type:text/csv");
+    header("Content-Disposition:attachment; filename=メッセージデータ。csv");
+    header("Content_Transfer-Encoding:binary");
 
-    if(!empty($_POST['admin_password'])&& $_POST['admin_password'] === PASSWORD) {
-        $_SESSION['admin_login'] = true;
-    }else{
-        $error_message[] = 'ログインに失敗しました。';
+    //CSVデータを作成
+    if(!empty($message_array)) {
+
+        //1行目のラベル作成
+        $csv_data .= '"ID","表示名","メッセージ","投稿日時"'."\n";
+
+        foreach($message_array as $value) {
+
+            //データを1行ずつCSVファイルに書き込む
+            $csv_data .= '"'.$value['id'].'","'.$value['view_name'].'","'.$value['message'].'","'.$value['post_date']."\"\n";
+        }
     }
 
-  }
+    //ファイルを出力
+    echo $csv_data;
 
-  if(!empty($pdo)) {
+}else{
 
-    //メッセージのデータを取得する
-    $sql = "SELECT view_name,message,post_date FROM message2 ORDER BY post_date DESC";
-    $message_array = $pdo->query($sql);
+    //ログインページへリダイレクト(エラーメッセージを表示せず管理ページのadmin.phpへ移動)
+    header("Location:./admin.php");
+    exit;
 }
 
+return;
 
-//データベースの接続を閉じる
-$pdo = null;
 
 ?>
 <!DOCTYPE html>
